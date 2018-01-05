@@ -93,7 +93,7 @@ public class VoiceTest
 
 		try {
 			InputStream config;
-			config = new FileInputStream(new File("/Users/illiahai/src/OsmAnd-test", "ttsconfig.p")); //$NON-NLS-1$
+			config = new FileInputStream(new File(".", "ttsconfig.p")); //$NON-NLS-1$
 			
 			prologSystem.getTheoryManager()
 				.assertA(new Struct("appMode", new Struct("car")), true, "", true);
