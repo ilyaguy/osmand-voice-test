@@ -3,6 +3,7 @@ package vt;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Iterator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +30,7 @@ public class VoiceTest
 {
 	private List<Struct> listStruct = new ArrayList<Struct>();
 
-	protected static final String C_ROUTE_NEW_CALC = "route_new_calc";  //$NON-NLS-1$
+	public static final String C_ROUTE_NEW_CALC = "route_new_calc";  //$NON-NLS-1$
 
 	protected Prolog prologSystem;
 
@@ -39,14 +40,13 @@ public class VoiceTest
 	private static int currentVersion;
 	protected String language = "";
 
-
-	public VoiceTest alt(Struct... s1) {
+	public List<Struct> alt(Struct... s1) {
 		if (s1.length == 1) {
 			listStruct.add(s1[0]);
 		} else {
 			listStruct.add(new Struct(s1));
 		}
-		return this;
+		return listStruct;
 	}
 
 	public Struct prepareStruct(String name, Object... args) {
@@ -79,7 +79,7 @@ public class VoiceTest
 		return struct;
 	}
 
-	public void test()
+	public void init()
 	{
 		try {
 			prologSystem = new Prolog(getLibraries());
@@ -126,7 +126,12 @@ public class VoiceTest
 		}
 		System.out.println("Language: " + language);
 
-		prepareStruct(C_ROUTE_NEW_CALC, 1340.0, 123);
+	}
+
+	public void test(Struct testVoiceParam)
+	{
+		execute(alt(testVoiceParam));
+		listStruct.clear();
 	}
 
 	public String[] getLibraries(){
@@ -146,6 +151,39 @@ public class VoiceTest
 			}
 		}
 		return val;
+	}
+
+	public List<String> execute(List<Struct> listCmd)
+	{
+		Struct list = new Struct(listCmd.toArray(new Term[listCmd.size()]));
+		Var result = new Var("RESULT"); //$NON-NLS-1$
+		List<String> files = new ArrayList<String>();
+		if(prologSystem == null) {
+			return files;
+		}
+
+		System.out.println("Query speak files " + listCmd);
+
+		SolveInfo res = prologSystem.solve(new Struct(P_RESOLVE, list, result));
+
+		if (res.isSuccess()) {
+			try {
+				prologSystem.solveEnd();
+				Term solution = res.getVarValue(result.getName());
+
+				Iterator<?> listIterator = ((Struct) solution).listIterator();
+				while(listIterator.hasNext()){
+					Object term = listIterator.next();
+					if(term instanceof Struct){
+						files.add(((Struct) term).getName());
+					}
+				}
+
+			} catch (NoSolutionException e) {
+			}
+		}
+		System.out.println("Speak files " + files);
+		return files;
 	}
 
 }
