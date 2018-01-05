@@ -6,15 +6,13 @@ package vt;
 public class Voice
 {
 
-	protected static final String C_ROUTE_NEW_CALC = "route_new_calc";  //$NON-NLS-1$
-
 	public static void main(String[] args)
 	{
 		System.out.println("Hello world!");
 
 		VoiceTest t = new VoiceTest();
 
-		t.prepareStruct(C_ROUTE_NEW_CALC, 1340.0, 123);
+		t.test();
 		
 	}
 }
