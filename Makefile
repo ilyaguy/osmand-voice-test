@@ -21,3 +21,4 @@ jar:	classes
 
 clean:
 	$(RM) vt/*.class
+	$(RM) vt.jar
