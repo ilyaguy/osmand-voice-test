@@ -1,6 +1,4 @@
-package MainApp;
-
-import MainApp.VoiceTest;
+package vt;
 
 /**
  * Test Voice activity
@@ -14,9 +12,9 @@ public class Voice
 	{
 		System.out.println("Hello world!");
 
-		VoiceTest vt = new VoiceTest();
+		VoiceTest t = new VoiceTest();
 
-		vt.prepareStruct(C_ROUTE_NEW_CALC, 1340.0, 123);
+		t.prepareStruct(C_ROUTE_NEW_CALC, 1340.0, 123);
 		
 	}
 }
