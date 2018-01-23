@@ -30,7 +30,37 @@ public class VoiceTest
 {
 	private List<Struct> listStruct = new ArrayList<Struct>();
 
-	public static final String C_ROUTE_NEW_CALC = "route_new_calc";  //$NON-NLS-1$
+	protected static final String C_PREPARE_TURN = "prepare_turn";  //$NON-NLS-1$
+	protected static final String C_PREPARE_ROUNDABOUT = "prepare_roundabout";  //$NON-NLS-1$
+	protected static final String C_PREPARE_MAKE_UT = "prepare_make_ut";  //$NON-NLS-1$
+	protected static final String C_ROUNDABOUT = "roundabout";  //$NON-NLS-1$
+	protected static final String C_GO_AHEAD = "go_ahead";  //$NON-NLS-1$
+	protected static final String C_TURN = "turn";  //$NON-NLS-1$
+	protected static final String C_MAKE_UT = "make_ut";  //$NON-NLS-1$
+	protected static final String C_MAKE_UTWP = "make_ut_wp";  //$NON-NLS-1$
+	protected static final String C_AND_ARRIVE_DESTINATION = "and_arrive_destination";  //$NON-NLS-1$
+	protected static final String C_REACHED_DESTINATION = "reached_destination";  //$NON-NLS-1$
+	protected static final String C_AND_ARRIVE_INTERMEDIATE = "and_arrive_intermediate";  //$NON-NLS-1$
+	protected static final String C_REACHED_INTERMEDIATE = "reached_intermediate";  //$NON-NLS-1$
+	protected static final String C_AND_ARRIVE_WAYPOINT = "and_arrive_waypoint";  //$NON-NLS-1$
+	protected static final String C_AND_ARRIVE_FAVORITE = "and_arrive_favorite";  //$NON-NLS-1$
+	protected static final String C_AND_ARRIVE_POI_WAYPOINT = "and_arrive_poi";  //$NON-NLS-1$
+	protected static final String C_REACHED_WAYPOINT = "reached_waypoint";  //$NON-NLS-1$
+	protected static final String C_REACHED_FAVORITE = "reached_favorite";  //$NON-NLS-1$
+	protected static final String C_REACHED_POI = "reached_poi";  //$NON-NLS-1$
+	protected static final String C_THEN = "then";  //$NON-NLS-1$
+	protected static final String C_SPEAD_ALARM = "speed_alarm";  //$NON-NLS-1$
+	protected static final String C_ATTENTION = "attention";  //$NON-NLS-1$
+	protected static final String C_OFF_ROUTE = "off_route";  //$NON-NLS-1$
+	protected static final String C_BACK_ON_ROUTE ="back_on_route"; //$NON-NLS-1$
+	
+	
+	protected static final String C_BEAR_LEFT = "bear_left";  //$NON-NLS-1$
+	protected static final String C_BEAR_RIGHT = "bear_right";  //$NON-NLS-1$
+	protected static final String C_ROUTE_RECALC = "route_recalc";  //$NON-NLS-1$
+	protected static final String C_ROUTE_NEW_CALC = "route_new_calc";  //$NON-NLS-1$
+	protected static final String C_LOCATION_LOST = "location_lost";  //$NON-NLS-1$
+	protected static final String C_LOCATION_RECOVERED = "location_recovered";  //$NON-NLS-1$
 
 	protected Prolog prologSystem;
 
@@ -74,12 +104,10 @@ public class VoiceTest
 		}
 		Struct struct = new Struct(name, list);
 
-		System.out.println("Adding command : " + name + " " + Arrays.toString(args)); //$NON-NLS-1$ //$NON-NLS-2$
-		
 		return struct;
 	}
 
-	public void init()
+	public void init(String appMode)
 	{
 		try {
 			prologSystem = new Prolog(getLibraries());
@@ -96,7 +124,7 @@ public class VoiceTest
 			config = new FileInputStream(new File(".", "ttsconfig.p")); //$NON-NLS-1$
 			
 			prologSystem.getTheoryManager()
-				.assertA(new Struct("appMode", new Struct("car")), true, "", true);
+				.assertA(new Struct("appMode", new Struct(appMode)), true, "", true);
 			
 			prologSystem.addTheory(new Theory("measure('km-m')."));
 			prologSystem.addTheory(new Theory(config));
@@ -116,7 +144,6 @@ public class VoiceTest
 		}
 
 		Term val = solveSimplePredicate(P_VERSION);
-
 		currentVersion = ((Number)val).intValue();
 		System.out.println("File version: " + currentVersion);
 
@@ -126,12 +153,7 @@ public class VoiceTest
 		}
 		System.out.println("Language: " + language);
 
-	}
-
-	public void test(Struct testVoiceParam)
-	{
-		execute(alt(testVoiceParam));
-		listStruct.clear();
+		System.out.println("");
 	}
 
 	public String[] getLibraries(){
@@ -158,6 +180,7 @@ public class VoiceTest
 		Struct list = new Struct(listCmd.toArray(new Term[listCmd.size()]));
 		Var result = new Var("RESULT"); //$NON-NLS-1$
 		List<String> files = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder();
 		if(prologSystem == null) {
 			return files;
 		}
@@ -176,14 +199,50 @@ public class VoiceTest
 					Object term = listIterator.next();
 					if(term instanceof Struct){
 						files.add(((Struct) term).getName());
+						sb.append(((Struct) term).getName());
 					}
 				}
 
 			} catch (NoSolutionException e) {
 			}
 		}
-		System.out.println("Speak files " + files);
+		System.out.println("Speak phrase: \"" + sb.toString() + "\"");
+
+		System.out.println("");
 		return files;
+	}	
+
+	public void test(Struct testVoiceParam)
+	{
+		execute(alt(testVoiceParam));
+		listStruct.clear();
+	}
+
+	public void test(String command)
+	{
+		String[] tokens = command.split("[,]");
+		switch (tokens[0]) {
+		case C_ROUTE_NEW_CALC:
+		case C_ROUTE_RECALC:
+			// 1 - dist, 2 -- time
+			test(prepareStruct(tokens[0], new Double(tokens[1]), new Integer(tokens[2])));
+		break;
+			
+		default:
+			System.out.println("Unknown command: " + command);
+			break;
+		}
+		listStruct.clear();
+	}
+
+	public void testNewRoute(double dist, int time)
+	{
+		test(prepareStruct(C_ROUTE_NEW_CALC, dist, time));
+	}
+
+	public void testRecalc(double dist, int time)
+	{
+		test(prepareStruct(C_ROUTE_RECALC, dist, time));
 	}
 
 }

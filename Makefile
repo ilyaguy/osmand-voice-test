@@ -18,7 +18,8 @@ jar:	classes
 	jar cfm vt.jar manifest.txt vt/*.class
 
 test:	jar
-	java -jar vt.jar
+	java -jar vt.jar bike
+	java -jar vt.jar car
 
 clean:
 	$(RM) vt/*.class

@@ -1,5 +1,11 @@
 package vt;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
 /**
  * Test Voice activity
  */
@@ -8,23 +14,45 @@ public class Voice
 
 	public static void main(String[] args)
 	{
-		VoiceTest t = new VoiceTest();
+		String appMode = "car";
+		if (args.length > 0) {
+			appMode = args[0];
+		}
+		VoiceTest test = new VoiceTest();
+		test.init(appMode);
 
-		t.init();
+		String testSource = "";
+		if (args.length > 1) {
+			testSource = args[1];
+			System.out.println("Test source file: " + testSource);
 
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 1340.0,  20)); // less 1 minute
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 134.0,  70));  // 1 minute
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 1340.0, 130)); // 2 minutes
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 2340.0, 190));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 3340.0, 250));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 4340.0, 310));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 5340.0, 310));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 6340.0, 370));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 7340.0, 430));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 8340.0, 490));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 9340.0, 550));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 10340.0, 610));
-		t.test(t.prepareStruct(t.C_ROUTE_NEW_CALC, 11340.0, 670));
-		
+			// Testing from file.
+			File file = new File(testSource);
+			BufferedReader reader = null;
+
+			try {
+				reader = new BufferedReader(new FileReader(file));
+				String text = null;
+
+				while ((text = reader.readLine()) != null) {
+					test.test(text);
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					if (reader != null) {
+						reader.close();
+					}
+				} catch (IOException e) {
+				}
+			}
+			
+		} else {
+			test.testNewRoute(1340.0, 420);
+			test.testRecalc(19100.0, 12340);
+		}
 	}
 }
