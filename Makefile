@@ -21,6 +21,10 @@ test:	jar
 	java -jar vt.jar bike
 	java -jar vt.jar car
 
+fulltest:	jar
+	java -jar vt.jar bike full.txt
+	java -jar vt.jar car full.txt
+
 clean:
 	$(RM) vt/*.class
 	$(RM) vt.jar
